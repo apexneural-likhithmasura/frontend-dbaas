@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Clean Workspace') {
             steps {
                 deleteDir()
@@ -18,7 +19,6 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 bat '''
-                cd updated-frontend
                 D:\\npm.cmd install
                 '''
             }
@@ -27,7 +27,6 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 bat '''
-                cd updated-frontend
                 D:\\npm.cmd run build
                 '''
             }
@@ -36,7 +35,7 @@ pipeline {
         stage('Zip Build') {
             steps {
                 bat '''
-                "C:\\Program Files\\7-Zip\\7z.exe" a build.zip .\\updated-frontend\\dist\\*
+                "C:\\Program Files\\7-Zip\\7z.exe" a build.zip .\\dist\\*
                 '''
             }
         }

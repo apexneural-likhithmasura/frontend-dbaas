@@ -57,9 +57,12 @@ pipeline {
                                     cd /var/www
                                     rm -rf frontend
                                     mkdir -p frontend
-                                    unzip -q build.zip -d frontend
+                                    unzip -o build.zip -d frontend
+                                    sudo chown -R www-data:www-data frontend
+                                    sudo chmod -R 755 frontend
                                     rm -f build.zip
                                     echo "Deployment completed successfully"
+                                    ls -la frontend
                                 '''
                             )
                         ],

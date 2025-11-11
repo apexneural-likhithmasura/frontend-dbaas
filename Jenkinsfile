@@ -1,13 +1,12 @@
 pipeline {
     agent any
-
+    
     environment {
         NODE_HOME = "D:\\"
         PATH = "${NODE_HOME};${env.PATH}"
     }
-
+    
     stages {
-
         stage('Checkout Code') {
             steps {
                 checkout([$class: 'GitSCM',
@@ -19,7 +18,7 @@ pipeline {
                 ])
             }
         }
-
+        
         stage('Install Dependencies') {
             steps {
                 bat """
@@ -27,7 +26,7 @@ pipeline {
                 """
             }
         }
-
+        
         stage('Build Frontend') {
             steps {
                 bat """
@@ -35,7 +34,7 @@ pipeline {
                 """
             }
         }
-
+        
         stage('Zip Build') {
             steps {
                 bat """
@@ -43,27 +42,43 @@ pipeline {
                 """
             }
         }
-
+        
         stage('Deploy to WSL') {
             steps {
                 sshPublisher(publishers: [
                     sshPublisherDesc(
-                        configName: 'wsl-ssh',      // <-- Your Jenkins SSH Credential ID
+                        configName: 'wsl-ssh',
                         transfers: [
                             sshTransfer(
                                 sourceFiles: 'build.zip',
-                                remoteDirectory: '/var/www/frontend',
+                                remoteDirectory: '/var/www',
                                 removePrefix: '',
                                 execCommand: '''
-                                    cd /var/www/frontend
-                                    rm -rf *
-                                    unzip build.zip
+                                    cd /var/www
+                                    rm -rf frontend
+                                    mkdir -p frontend
+                                    unzip -q build.zip -d frontend
+                                    rm -f build.zip
+                                    echo "Deployment completed successfully"
                                 '''
                             )
-                        ]
+                        ],
+                        verbose: true
                     )
                 ])
             }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Frontend deployment completed successfully!'
+        }
+        failure {
+            echo 'Frontend deployment failed. Check the logs above.'
+        }
+        always {
+            cleanWs()
         }
     }
 }

@@ -51,18 +51,19 @@ pipeline {
                         transfers: [
                             sshTransfer(
                                 sourceFiles: 'build.zip',
-                                remoteDirectory: '/var/www',
+                                remoteDirectory: '/home/pandu',
                                 removePrefix: '',
                                 execCommand: '''
-                                    cd /var/www
-                                    rm -rf frontend
-                                    mkdir -p frontend
-                                    unzip -o build.zip -d frontend
-                                    sudo chown -R www-data:www-data frontend
-                                    sudo chmod -R 755 frontend
+                                    cd /home/pandu
+                                    rm -rf /var/www/frontend
+                                    mkdir -p /var/www/frontend
+                                    unzip -o build.zip -d /var/www/frontend
+                                    sudo chown -R www-data:www-data /var/www/frontend
+                                    sudo chmod -R 755 /var/www/frontend
                                     rm -f build.zip
                                     echo "Deployment completed successfully"
-                                    ls -la frontend
+                                    echo "Files deployed:"
+                                    ls -la /var/www/frontend
                                 '''
                             )
                         ],

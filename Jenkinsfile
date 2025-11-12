@@ -1,11 +1,11 @@
 pipeline {
     agent any
-    
+
     environment {
         NODE_HOME = "D:\\"
         PATH = "${NODE_HOME};${env.PATH}"
     }
-    
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -18,7 +18,7 @@ pipeline {
                 ])
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
                 bat """
@@ -26,7 +26,7 @@ pipeline {
                 """
             }
         }
-        
+
         stage('Build Frontend') {
             steps {
                 bat """
@@ -34,7 +34,7 @@ pipeline {
                 """
             }
         }
-        
+
         stage('Zip Build') {
             steps {
                 bat """
@@ -42,7 +42,7 @@ pipeline {
                 """
             }
         }
-        
+
         stage('Deploy to WSL') {
             steps {
                 sshPublisher(publishers: [
@@ -51,17 +51,22 @@ pipeline {
                         transfers: [
                             sshTransfer(
                                 sourceFiles: 'build.zip',
-                                remoteDirectory: '/home/pandu',
+                                remoteDirectory: '/home/pandu',      // ✅ absolute path fixed
                                 removePrefix: '',
                                 execCommand: '''
                                     cd /home/pandu
                                     rm -rf /var/www/frontend
                                     mkdir -p /var/www/frontend
-                                    unzip -o build.zip -d /var/www/frontend
+
+                                    # ✅ use absolute path for unzip
+                                    unzip -o /home/pandu/build.zip -d /var/www/frontend
+
+                                    # ✅ apply correct permissions
                                     sudo chown -R www-data:www-data /var/www/frontend
                                     sudo chmod -R 755 /var/www/frontend
-                                    rm -f build.zip
-                                    echo "Deployment completed successfully"
+
+                                    rm -f /home/pandu/build.zip
+                                    echo "✅ Deployment completed successfully!"
                                     echo "Files deployed:"
                                     ls -la /var/www/frontend
                                 '''
@@ -73,13 +78,13 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
-            echo 'Frontend deployment completed successfully!'
+            echo '✅ Frontend deployment completed successfully!'
         }
         failure {
-            echo 'Frontend deployment failed. Check the logs above.'
+            echo '❌ Frontend deployment failed. Check the logs above.'
         }
         always {
             cleanWs()

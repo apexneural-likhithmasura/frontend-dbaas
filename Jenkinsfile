@@ -51,7 +51,7 @@ pipeline {
                         transfers: [
                             sshTransfer(
                                 sourceFiles: 'build.zip',
-                                remoteDirectory: '/home/pandu',      // ✅ absolute path fixed
+                                remoteDirectory: '',      // ✅ absolute path fixed
                                 removePrefix: '',
                                 execCommand: '''
                                     cd /home/pandu
